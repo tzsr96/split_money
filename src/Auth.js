@@ -9,25 +9,34 @@ function Auth({ onAuth }) {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
 
-  const handleAuth = async (e) => {
-    e.preventDefault();
-    const endpoint = isLogin ? '/login' : '/register';
-    try {
-      
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}${endpoint}`, { username, password });
-      console.log(response); 
-      if (isLogin) {
-        const token = response.data.token;
-        localStorage.setItem('authToken', token);
-        onAuth(token);
-      } else {
-        setMessage(response.data);
-      }
-    } catch (error) {
-      console.error(error); 
-      setMessage(error.response ? error.response.data : 'An error occurred');
+  const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  },
+  withCredentials: true
+});
+
+// In your handleAuth function:
+const handleAuth = async (e) => {
+  e.preventDefault();
+  const endpoint = isLogin ? '/login' : '/register';
+  try {
+    const response = await api.post(endpoint, { username, password });
+    console.log(response);
+    if (isLogin) {
+      const token = response.data.token;
+      localStorage.setItem('authToken', token);
+      onAuth(token);
+    } else {
+      setMessage(response.data);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    setMessage(error.response ? error.response.data : 'An error occurred');
+  }
+};
 
   return (
     <div className="auth-wrapper">
